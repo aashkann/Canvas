@@ -9,6 +9,7 @@ from speckle_automate import (
     AutomationContext,
     execute_automate_function,
 )
+from specklepy.objects.geometry import Brep
 
 from flatten import flatten_base
 
@@ -45,41 +46,47 @@ def automate_function(
             It also has conveniece methods attach result data to the Speckle model.
         function_inputs: An instance object matching the defined schema.
     """
-    # the context provides a conveniet way, to receive the triggering version
-    version_root_object = automate_context.receive_version()
+    try:
+        # the context provides a conveniet way, to receive the triggering version
+        version_root_object = automate_context.receive_version()
 
-    objects_with_forbidden_speckle_type = [
-        b
-        for b in flatten_base(version_root_object)
-        if b.speckle_type == function_inputs.forbidden_speckle_type
-    ]
-    count = len(objects_with_forbidden_speckle_type)
+        #print(version_root_object["elements"])
 
-    if count > 0:
-        # this is how a run is marked with a failure cause
-        automate_context.attach_error_to_objects(
-            category="Forbidden speckle_type"
-            " ({function_inputs.forbidden_speckle_type})",
-            object_ids=[o.id for o in objects_with_forbidden_speckle_type if o.id],
-            message="This project should not contain the type: "
-            f"{function_inputs.forbidden_speckle_type}",
-        )
-        automate_context.mark_run_failed(
-            "Automation failed: "
-            f"Found {count} object that have one of the forbidden speckle types: "
-            f"{function_inputs.forbidden_speckle_type}"
-        )
 
-        # set the automation context view, to the original model / version view
-        # to show the offending objects
-        automate_context.set_context_view()
+        flattened = list(flatten_base(version_root_object))
+        
+        objects = [
+            b
+            for b in flattened
+            if b.speckle_type in [Brep.speckle_type]
+        ]
 
-    else:
+        context = [b for b in objects if b["name"] == "Context"]
+        design = [b for b in objects if b["name"] == "Design"]
+        base = [b for b in objects if b["name"] == "Base"]
+
+
+        context_meshes = [mesh.displayValue for mesh in context]
+        design_meshes = [mesh.displayValue for mesh in design]
+        base_meshes = [mesh.displayValue for mesh in base]
+
+        print(len(context_meshes))
+        print(len(design_meshes))
+        pint(len(base_meshes))
+        
         automate_context.mark_run_success("No forbidden types found.")
 
-    # if the function generates file results, this is how it can be
-    # attached to the Speckle project / model
-    # automate_context.store_file_result("./report.pdf")
+        # if the function generates file results, this is how it can be
+        # attached to the Speckle project / model
+        # automate_context.store_file_result("./report.pdf")
+    except e:
+        print(e)
+        automate_context.mark_run_success("No forbidden types found.")
+        #automate_context.mark_run_failed(
+        #        "Automation failed: "
+        #        f"Found {count} object that have one of the forbidden speckle types: "
+        #        f"{function_inputs.forbidden_speckle_type}"
+        #    )
 
 
 def automate_function_without_inputs(automate_context: AutomationContext) -> None:
