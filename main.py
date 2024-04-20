@@ -11,6 +11,7 @@ from speckle_automate import (
 )
 from specklepy.objects.geometry import Brep
 
+from tracer import trace
 from flatten import flatten_base
 
 
@@ -66,13 +67,18 @@ def automate_function(
         base = [b for b in objects if b["name"] == "Base"]
 
 
-        context_meshes = [mesh.displayValue for mesh in context]
-        design_meshes = [mesh.displayValue for mesh in design]
-        base_meshes = [mesh.displayValue for mesh in base]
+        context_meshes = [mesh.displayValue[0] for mesh in context]
+        design_meshes = [mesh.displayValue[0] for mesh in design]
+        base_meshes = [mesh.displayValue[0] for mesh in base]
 
-        print(len(context_meshes))
-        print(len(design_meshes))
-        print(len(base_meshes))
+        # print(len(context_meshes))
+        # print(len(design_meshes))
+        # print(len(base_meshes))
+
+        results = trace(base_meshes, design_meshes, context_meshes)
+
+        print(results)
+        
         
         automate_context.mark_run_success("No forbidden types found.")
 
