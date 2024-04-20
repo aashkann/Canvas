@@ -72,7 +72,7 @@ def automate_function(
 
         print(len(context_meshes))
         print(len(design_meshes))
-        pint(len(base_meshes))
+        print(len(base_meshes))
         
         automate_context.mark_run_success("No forbidden types found.")
 
