@@ -62,7 +62,7 @@ def automate_function(
             if b.speckle_type in [Brep.speckle_type]
         ]
 
-        print(b["name"] for b in objects)
+        print(list(b["name"] for b in objects))
 
         context = [b for b in objects if b["name"] == "Context"]
         design = [b for b in objects if b["name"] == "Design"]
