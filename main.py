@@ -3,6 +3,8 @@
 Use the automation_context module to wrap your function in an Autamate context helper
 """
 
+import numpy as np
+from PIL import Image as im 
 from pydantic import Field, SecretStr
 from speckle_automate import (
     AutomateBase,
@@ -63,20 +65,20 @@ def automate_function(
             if b.speckle_type in [Brep.speckle_type, Mesh.speckle_type]
         ]
 
-        print(list(b["name"] for b in objects))
+        # print(list(b["name"] for b in objects))
 
         context = [b for b in objects if b["name"] == "Context"]
         design = [b for b in objects if b["name"] == "Design"]
         base = [b for b in objects if b["name"] == "Base"]
 
-        print(len(context))
-        print(len(design))
-        print(len(base))
+        # print(len(context))
+        # print(len(design))
+        # print(len(base))
 
 
         context_meshes = [mesh.displayValue[0] for mesh in context]
         design_meshes = [mesh.displayValue[0] for mesh in design]
-        base_meshes = [mesh.displayValue[0] for mesh in base]
+        base_meshes = [mesh.displayValue[0] if mesh.speckle_type == Brep.speckle_type else mesh for mesh in base]
 
         # print(len(context_meshes))
         # print(len(design_meshes))
@@ -85,21 +87,22 @@ def automate_function(
         results = trace(base_meshes, design_meshes, context_meshes)
 
         print(results)
+
+        data = im.fromarray(results)
+        data = data.convert('RGB')
+        data.save("results.png")
+
         
-        
-        automate_context.mark_run_success("No forbidden types found.")
 
         # if the function generates file results, this is how it can be
         # attached to the Speckle project / model
-        # automate_context.store_file_result("./report.pdf")
-    except e:
-        print(e)
+        automate_context.store_file_result("./results.png")
         automate_context.mark_run_success("No forbidden types found.")
-        #automate_context.mark_run_failed(
-        #        "Automation failed: "
-        #        f"Found {count} object that have one of the forbidden speckle types: "
-        #        f"{function_inputs.forbidden_speckle_type}"
-        #    )
+    except e:
+        #automate_context.mark_run_success("No forbidden types found.")
+        automate_context.mark_run_failed(
+                "Automation failed: "
+            )
 
 
 def automate_function_without_inputs(automate_context: AutomationContext) -> None:

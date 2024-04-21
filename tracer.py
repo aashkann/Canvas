@@ -1,5 +1,5 @@
 import math
-
+import numpy as np
 
 sun = [[x, 0, 100] for x in range(-100, 100, 2)]
 
@@ -104,6 +104,9 @@ def trace(base_meshes, design_meshes, context_meshes):
 
     [[min_x, min_y, min_z], [max_x, max_y, max_z]] = bounding_box(base_meshes[0].vertices)
 
+    width = int(math.ceil(max_x) - math.floor(min_x)) / 10
+    height = int(math.ceil(max_y) - math.floor(min_y)) / 10 
+
     sample_points = flatten([[[x, y, max_z] for x in range(math.floor(min_x), math.ceil(max_x), 10)] for y in range(math.floor(min_y), math.ceil(max_y), 10)])
 
     triangles = groupByThree(flatten(create_triangles(design_meshes, context_meshes)))
@@ -115,8 +118,9 @@ def trace(base_meshes, design_meshes, context_meshes):
             ray = [sun_position, normalize(sub(sample_point, sun_position))]
             if not intersect(ray, triangles):
                 results[i] += 1
+    
 
-    return results
+    return np.array(results, dtype=np.uint8).reshape((14, 14)) / 100 * 255
 
 def flatten(list):
     return [item for sublist in list for item in sublist]
