@@ -9,7 +9,7 @@ from speckle_automate import (
     AutomationContext,
     execute_automate_function,
 )
-from specklepy.objects.geometry import Brep
+from specklepy.objects.geometry import Brep, Mesh
 
 from tracer import trace
 from flatten import flatten_base
@@ -55,11 +55,12 @@ def automate_function(
 
 
         flattened = list(flatten_base(version_root_object))
-        
+
+
         objects = [
             b
             for b in flattened
-            if b.speckle_type in [Brep.speckle_type]
+            if b.speckle_type in [Brep.speckle_type, Mesh.speckle_type]
         ]
 
         print(list(b["name"] for b in objects))
